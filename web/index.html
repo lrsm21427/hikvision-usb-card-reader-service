@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="本地 USB 读卡器网页控制台">
+    <title>USB 读卡器</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main class="page-shell">
+    <header class="app-header">
+        <div class="brand-mark" aria-hidden="true">CR</div>
+        <div>
+            <p class="eyebrow">HCUSBSDK · 本地服务</p>
+            <h1>USB 读卡器</h1>
+        </div>
+        <div class="status-actions">
+            <div class="service-status" id="serviceStatus" role="status">
+                <span class="status-dot"></span>
+                <span id="statusText">正在检测读卡器</span>
+            </div>
+            <button type="button" class="status-check-button" id="statusCheckButton">重新检测</button>
+        </div>
+    </header>
+
+    <section class="reader-layout" aria-label="读卡操作区">
+        <article class="reader-card">
+            <div class="reader-visual" aria-hidden="true">
+                <div class="signal-ring ring-one"></div>
+                <div class="signal-ring ring-two"></div>
+                <div class="card-chip"></div>
+            </div>
+            <div class="reader-copy">
+                <p class="step-label">单次读取</p>
+                <h2>将卡片放在读卡区域</h2>
+                <p>点击按钮后，设备会在 5 秒内读取一次 UID，不会修改卡内数据。</p>
+                <button type="button" id="readButton" class="read-button" disabled>
+                    <span class="button-label">读取卡片</span>
+                    <span class="button-waiting">正在等待卡片…</span>
+                </button>
+                <p class="operation-message" id="operationMessage" aria-live="polite">
+                    读卡器将在首次读取时自动连接
+                </p>
+            </div>
+        </article>
+
+        <article class="result-panel" id="resultPanel" aria-labelledby="resultTitle">
+            <div class="result-heading">
+                <div>
+                    <p class="step-label">读取结果</p>
+                    <h2 id="resultTitle">等待读取</h2>
+                </div>
+                <span class="result-check" id="resultCheck" aria-hidden="true">✓</span>
+            </div>
+
+            <dl class="result-list">
+                <div class="result-primary">
+                    <dt>十进制卡号</dt>
+                    <dd id="uidDecimal">—</dd>
+                </div>
+                <div>
+                    <dt>十六进制 UID</dt>
+                    <dd id="uidHex">—</dd>
+                </div>
+                <div>
+                    <dt>卡片类型</dt>
+                    <dd id="cardType">—</dd>
+                </div>
+                <div>
+                    <dt>UID 长度</dt>
+                    <dd id="uidLength">—</dd>
+                </div>
+                <div>
+                    <dt>读取时间</dt>
+                    <dd id="readAt">—</dd>
+                </div>
+            </dl>
+
+            <footer class="device-footer">
+                <span>当前设备</span>
+                <strong id="deviceName">尚未连接</strong>
+                <small id="deviceSerial"></small>
+            </footer>
+        </article>
+    </section>
+
+    <footer class="privacy-note">
+        <span aria-hidden="true">●</span>
+        所有读卡操作均在本机完成，网页不会上传或保存卡号。
+    </footer>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

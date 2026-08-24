@@ -1,0 +1,24 @@
+# IDE
+/.idea/
+*.iml
+
+# Java / Maven
+/target/
+/out/
+*.class
+*.jar
+
+# Packaging outputs and downloaded build tools
+/dist/
+/installer/
+/tools/
+
+# Native and archive binaries
+*.dll
+*.lib
+*.exe
+*.zip
+
+# Logs and crash dumps
+*.log
+hs_err_pid*
