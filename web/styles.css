@@ -373,12 +373,12 @@ h2 {
 }
 
 .device-footer {
-    margin-top: auto;
+    margin-top: 26px;
     padding-top: 28px;
+    border-top: 1px solid var(--line);
 }
 
-.device-footer span,
-.device-footer small {
+.device-footer > span {
     display: block;
     color: var(--muted);
     font-size: 12px;
@@ -387,6 +387,41 @@ h2 {
 .device-footer strong {
     display: block;
     margin: 6px 0 4px;
+}
+
+.device-list {
+    margin: 14px 0 0;
+}
+
+.device-list > div {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
+    padding: 7px 0;
+}
+
+.device-list dt {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.device-list dd {
+    min-width: 0;
+    margin: 0;
+    text-align: right;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.device-list .device-path-row {
+    display: block;
+}
+
+.device-path-row dd {
+    margin-top: 5px;
+    text-align: left;
 }
 
 .privacy-note {

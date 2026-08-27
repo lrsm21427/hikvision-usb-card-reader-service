@@ -24,6 +24,14 @@
 
 业务系统通常使用响应中的十进制 `uidDecimal`。
 
+读卡响应同时提供两套 UID 转换结果：
+
+- `uidBytes`、`uidHexRaw`、`uidDecimalRaw`：HCUSBSDK 返回的原始字节顺序。
+- `uidHex`、`uidDecimal`：按原项目规则反转字节后的兼容结果，OA 绑定继续使用
+  `uidDecimal`。
+- `cardTypeCode`、`selectVerifyHex`：SDK 返回的卡片类型代码和选择确认数据。
+- `device`：读卡器厂商、型号、序列号、VID/PID、设备类型及协议版本等枚举信息。
+
 ## 开发环境
 
 - Windows x64
@@ -80,7 +88,7 @@ package-installer.bat
 脚本首次运行时会自动下载便携版 WiX 3.14.1，并校验 SHA-256。输出文件：
 
 ```text
-installer/海康IC读卡器-1.0.4.exe
+installer/海康IC读卡器-1.0.5.exe
 ```
 
 安装包不应提交到源码历史，建议作为 GitHub Release 附件发布。
@@ -107,5 +115,5 @@ VITE_CARD_READER_URL=http://127.0.0.1:18080
 
 ## 客户端使用
 
-普通用户只需要从 GitHub Releases 下载并安装 `海康IC读卡器-1.0.4.exe`，无需安装
+普通用户只需要从 GitHub Releases 下载并安装 `海康IC读卡器-1.0.5.exe`，无需安装
 Java、JDK 或 Maven。读卡器无法识别时，请先安装海康 USB 驱动。

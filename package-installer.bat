@@ -7,7 +7,7 @@ set "JPACKAGE_EXE=%JAVA_HOME%\bin\jpackage.exe"
 set "WIX_DIR=%CD%\tools\wix314"
 set "APP_IMAGE=%CD%\dist\海康IC读卡器"
 set "INSTALLER_DIR=%CD%\installer"
-set "INSTALLER_EXE=%INSTALLER_DIR%\海康IC读卡器-1.0.4.exe"
+set "INSTALLER_EXE=%INSTALLER_DIR%\海康IC读卡器-1.0.5.exe"
 
 if not defined JAVA_HOME (
     echo [ERROR] JAVA_HOME must point to a 64-bit JDK 17.
@@ -33,7 +33,7 @@ set "PATH=%WIX_DIR%;%PATH%"
 "%JPACKAGE_EXE%" ^
   --type exe ^
   --name "海康IC读卡器" ^
-  --app-version 1.0.4 ^
+  --app-version 1.0.5 ^
   --vendor Yaxin ^
   --description "海康 USB 读卡器本地服务" ^
   --app-image "%APP_IMAGE%" ^

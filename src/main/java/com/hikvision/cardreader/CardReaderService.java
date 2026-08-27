@@ -71,24 +71,32 @@ public final class CardReaderService implements AutoCloseable {
             throw new CardReaderException(-1, "设备返回了无效的卡片序列号长度");
         }
 
-        StringBuilder hexBuilder = new StringBuilder(serialLength * 2);
-        for (int i = 0; i < serialLength; i++) {
-            int value = result.bySerial[i] & 0xff;
-            hexBuilder.insert(0, String.format("%02X", value));
-        }
-
-        String uidHex = hexBuilder.toString();
+        String uidHexRaw = bytesToHex(result.bySerial, serialLength, false);
+        String uidHex = bytesToHex(result.bySerial, serialLength, true);
+        String uidBytes = bytesToSpacedHex(result.bySerial, serialLength);
+        String uidDecimalRaw = new BigInteger(uidHexRaw, 16).toString(10);
         String uidDecimal = new BigInteger(uidHex, 16).toString(10);
         int cardTypeIndex = result.byCardType & 0xff;
         String cardType = cardTypeIndex < CARD_TYPES.length
                 ? CARD_TYPES[cardTypeIndex]
                 : "未知类型（" + cardTypeIndex + "）";
+        int selectVerifyLength = result.bySelectVerifyLen & 0xff;
+        if (selectVerifyLength > result.bySelectVerify.length) {
+            selectVerifyLength = result.bySelectVerify.length;
+        }
+        String selectVerifyHex = bytesToSpacedHex(result.bySelectVerify, selectVerifyLength);
 
         return new CardResult(
                 uidHex,
                 uidDecimal,
+                uidHexRaw,
+                uidDecimalRaw,
+                uidBytes,
                 serialLength,
                 cardType,
+                cardTypeIndex,
+                selectVerifyHex,
+                selectVerifyLength,
                 connectedDevice,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         );
@@ -185,10 +193,18 @@ public final class CardReaderService implements AutoCloseable {
 
     private static DeviceInfo toDeviceInfo(HCUsbSDK.USB_DEVICE_INFO device) {
         return new DeviceInfo(
+                nullTerminated(device.szManufacturer),
                 nullTerminated(device.szDeviceName),
                 nullTerminated(device.szSerialNumber),
+                nullTerminated(device.szDevicePath),
+                device.dwIndex,
                 device.dwVID,
-                device.dwPID
+                device.dwPID,
+                device.byHaveAudio & 0xff,
+                device.iColorType & 0xff,
+                device.byDeviceType & 0xff,
+                device.dwBCD,
+                device.byProtocolType & 0xff
         );
     }
 
@@ -211,6 +227,26 @@ public final class CardReaderService implements AutoCloseable {
         return new String(value, 0, length, StandardCharsets.UTF_8).trim();
     }
 
+    private static String bytesToHex(byte[] value, int length, boolean reverse) {
+        StringBuilder hex = new StringBuilder(length * 2);
+        for (int offset = 0; offset < length; offset++) {
+            int index = reverse ? length - 1 - offset : offset;
+            hex.append(String.format("%02X", value[index] & 0xff));
+        }
+        return hex.toString();
+    }
+
+    private static String bytesToSpacedHex(byte[] value, int length) {
+        StringBuilder hex = new StringBuilder(Math.max(0, length * 3 - 1));
+        for (int index = 0; index < length; index++) {
+            if (index > 0) {
+                hex.append(' ');
+            }
+            hex.append(String.format("%02X", value[index] & 0xff));
+        }
+        return hex.length() == 0 ? "无" : hex.toString();
+    }
+
     @Override
     public synchronized void close() {
         resetLogin();
@@ -223,17 +259,30 @@ public final class CardReaderService implements AutoCloseable {
     public static final class CardResult {
         final String uidHex;
         final String uidDecimal;
+        final String uidHexRaw;
+        final String uidDecimalRaw;
+        final String uidBytes;
         final int uidLength;
         final String cardType;
+        final int cardTypeCode;
+        final String selectVerifyHex;
+        final int selectVerifyLength;
         final DeviceInfo device;
         final String readAt;
 
-        CardResult(String uidHex, String uidDecimal, int uidLength, String cardType,
-                   DeviceInfo device, String readAt) {
+        CardResult(String uidHex, String uidDecimal, String uidHexRaw, String uidDecimalRaw,
+                   String uidBytes, int uidLength, String cardType, int cardTypeCode,
+                   String selectVerifyHex, int selectVerifyLength, DeviceInfo device, String readAt) {
             this.uidHex = uidHex;
             this.uidDecimal = uidDecimal;
+            this.uidHexRaw = uidHexRaw;
+            this.uidDecimalRaw = uidDecimalRaw;
+            this.uidBytes = uidBytes;
             this.uidLength = uidLength;
             this.cardType = cardType;
+            this.cardTypeCode = cardTypeCode;
+            this.selectVerifyHex = selectVerifyHex;
+            this.selectVerifyLength = selectVerifyLength;
             this.device = device;
             this.readAt = readAt;
         }
@@ -242,27 +291,66 @@ public final class CardReaderService implements AutoCloseable {
             return "{\"success\":true"
                     + ",\"uidHex\":\"" + json(uidHex) + "\""
                     + ",\"uidDecimal\":\"" + json(uidDecimal) + "\""
+                    + ",\"uidHexRaw\":\"" + json(uidHexRaw) + "\""
+                    + ",\"uidDecimalRaw\":\"" + json(uidDecimalRaw) + "\""
+                    + ",\"uidBytes\":\"" + json(uidBytes) + "\""
                     + ",\"uidLength\":" + uidLength
                     + ",\"cardType\":\"" + json(cardType) + "\""
+                    + ",\"cardTypeCode\":" + cardTypeCode
+                    + ",\"selectVerifyHex\":\"" + json(selectVerifyHex) + "\""
+                    + ",\"selectVerifyLength\":" + selectVerifyLength
                     + ",\"readAt\":\"" + json(readAt) + "\""
-                    + ",\"device\":{\"name\":\"" + json(device.name) + "\""
-                    + ",\"serialNumber\":\"" + json(device.serialNumber) + "\""
-                    + ",\"vid\":" + device.vid
-                    + ",\"pid\":" + device.pid + "}}";
+                    + ",\"device\":" + device.toJson() + "}";
         }
     }
 
     static final class DeviceInfo {
+        final String manufacturer;
         final String name;
         final String serialNumber;
+        final String path;
+        final int index;
         final int vid;
         final int pid;
+        final int haveAudio;
+        final int colorType;
+        final int deviceType;
+        final int bcd;
+        final int protocolType;
 
-        DeviceInfo(String name, String serialNumber, int vid, int pid) {
+        DeviceInfo(String manufacturer, String name, String serialNumber, String path, int index,
+                   int vid, int pid, int haveAudio, int colorType, int deviceType, int bcd,
+                   int protocolType) {
+            this.manufacturer = manufacturer;
             this.name = name;
             this.serialNumber = serialNumber;
+            this.path = path;
+            this.index = index;
             this.vid = vid;
             this.pid = pid;
+            this.haveAudio = haveAudio;
+            this.colorType = colorType;
+            this.deviceType = deviceType;
+            this.bcd = bcd;
+            this.protocolType = protocolType;
+        }
+
+        String toJson() {
+            return "{\"manufacturer\":\"" + json(manufacturer) + "\""
+                    + ",\"name\":\"" + json(name) + "\""
+                    + ",\"serialNumber\":\"" + json(serialNumber) + "\""
+                    + ",\"path\":\"" + json(path) + "\""
+                    + ",\"index\":" + Integer.toUnsignedLong(index)
+                    + ",\"vid\":" + Integer.toUnsignedLong(vid)
+                    + ",\"pid\":" + Integer.toUnsignedLong(pid)
+                    + ",\"vidHex\":\"" + String.format("%04X", Integer.toUnsignedLong(vid)) + "\""
+                    + ",\"pidHex\":\"" + String.format("%04X", Integer.toUnsignedLong(pid)) + "\""
+                    + ",\"haveAudio\":" + haveAudio
+                    + ",\"colorType\":" + colorType
+                    + ",\"deviceType\":" + deviceType
+                    + ",\"bcd\":" + Integer.toUnsignedLong(bcd)
+                    + ",\"bcdHex\":\"" + String.format("%08X", Integer.toUnsignedLong(bcd)) + "\""
+                    + ",\"protocolType\":" + protocolType + "}";
         }
     }
 
@@ -296,11 +384,7 @@ public final class CardReaderService implements AutoCloseable {
                 .append(",\"connected\":").append(connected)
                 .append(",\"message\":\"").append(json(message)).append("\"");
         if (device != null) {
-            json.append(",\"device\":{\"name\":\"").append(json(device.name)).append("\"")
-                    .append(",\"serialNumber\":\"").append(json(device.serialNumber)).append("\"")
-                    .append(",\"vid\":").append(device.vid)
-                    .append(",\"pid\":").append(device.pid)
-                    .append("}");
+            json.append(",\"device\":").append(device.toJson());
         }
         return json.append("}").toString();
     }

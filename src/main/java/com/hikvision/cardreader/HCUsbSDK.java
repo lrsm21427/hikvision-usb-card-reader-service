@@ -49,7 +49,8 @@ public interface HCUsbSDK extends StdCallLibrary {
     }
 
     @Structure.FieldOrder({"dwSize", "dwIndex", "dwVID", "dwPID", "szManufacturer", "szDeviceName",
-            "szSerialNumber", "byHaveAudio", "iColorType", "szDevicePath", "byDeviceType", "dwBCD", "byRes"})
+            "szSerialNumber", "byHaveAudio", "iColorType", "szDevicePath", "byDeviceType", "dwBCD",
+            "byProtocolType", "byRes"})
     class USB_DEVICE_INFO extends Structure {
         public int dwSize;
         public int dwIndex;
@@ -63,7 +64,8 @@ public interface HCUsbSDK extends StdCallLibrary {
         public byte[] szDevicePath = new byte[HPR_MAX_PATH];
         public byte byDeviceType;
         public int dwBCD;
-        public byte[] byRes = new byte[249];
+        public byte byProtocolType;
+        public byte[] byRes = new byte[248];
     }
 
     @Structure.FieldOrder({"struDeviceArr"})

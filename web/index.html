@@ -56,11 +56,23 @@
 
             <dl class="result-list">
                 <div class="result-primary">
-                    <dt>十进制卡号</dt>
+                    <dt>当前兼容卡号（反转字节十进制）</dt>
                     <dd id="uidDecimal">—</dd>
                 </div>
                 <div>
-                    <dt>十六进制 UID</dt>
+                    <dt>SDK 原始字节</dt>
+                    <dd id="uidBytes">—</dd>
+                </div>
+                <div>
+                    <dt>SDK 原始十六进制</dt>
+                    <dd id="uidHexRaw">—</dd>
+                </div>
+                <div>
+                    <dt>SDK 原始十进制</dt>
+                    <dd id="uidDecimalRaw">—</dd>
+                </div>
+                <div>
+                    <dt>反转字节十六进制</dt>
                     <dd id="uidHex">—</dd>
                 </div>
                 <div>
@@ -68,8 +80,20 @@
                     <dd id="cardType">—</dd>
                 </div>
                 <div>
+                    <dt>卡片类型代码</dt>
+                    <dd id="cardTypeCode">—</dd>
+                </div>
+                <div>
                     <dt>UID 长度</dt>
                     <dd id="uidLength">—</dd>
+                </div>
+                <div>
+                    <dt>选择确认数据</dt>
+                    <dd id="selectVerifyHex">—</dd>
+                </div>
+                <div>
+                    <dt>选择确认长度</dt>
+                    <dd id="selectVerifyLength">—</dd>
                 </div>
                 <div>
                     <dt>读取时间</dt>
@@ -80,7 +104,18 @@
             <footer class="device-footer">
                 <span>当前设备</span>
                 <strong id="deviceName">尚未连接</strong>
-                <small id="deviceSerial"></small>
+                <dl class="device-list">
+                    <div><dt>厂商</dt><dd id="deviceManufacturer">—</dd></div>
+                    <div><dt>序列号</dt><dd id="deviceSerial">—</dd></div>
+                    <div><dt>设备索引</dt><dd id="deviceIndex">—</dd></div>
+                    <div><dt>VID / PID</dt><dd id="deviceVidPid">—</dd></div>
+                    <div><dt>设备类型</dt><dd id="deviceType">—</dd></div>
+                    <div><dt>协议类型</dt><dd id="deviceProtocol">—</dd></div>
+                    <div><dt>BCD 版本</dt><dd id="deviceBcd">—</dd></div>
+                    <div><dt>音频能力</dt><dd id="deviceAudio">—</dd></div>
+                    <div><dt>颜色通道</dt><dd id="deviceColorType">—</dd></div>
+                    <div class="device-path-row"><dt>设备路径</dt><dd id="devicePath">—</dd></div>
+                </dl>
             </footer>
         </article>
     </section>
